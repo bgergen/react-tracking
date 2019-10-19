@@ -1,7 +1,9 @@
-import { useContext, useMemo } from 'react';
-import { ReactTrackingContext } from './withTrackingComponentDecorator';
+import React, { useCallback, useContext, useMemo } from 'react';
 
-export default function useTracking() {
+import ReactTrackingContext from './ReactTrackingContext';
+import useTrackingImpl from './useTrackingImpl';
+
+export default function useTracking(trackingData, options) {
   const trackingContext = useContext(ReactTrackingContext);
 
   if (!(trackingContext && trackingContext.tracking)) {
@@ -12,14 +14,19 @@ export default function useTracking() {
     );
   }
 
-  return useMemo(
-    () => ({
-      getTrackingData: trackingContext.tracking.getTrackingData,
-      trackEvent: trackingContext.tracking.dispatch,
-    }),
-    [
-      trackingContext.tracking.getTrackingData,
-      trackingContext.tracking.dispatch,
-    ]
+  const { contextValue, tracking } = useTrackingImpl(trackingData, options);
+
+  const TrackingProvider = useCallback(
+    ({ children }) => (
+      <ReactTrackingContext.Provider value={contextValue}>
+        {children}
+      </ReactTrackingContext.Provider>
+    ),
+    [contextValue]
   );
+
+  return useMemo(() => [TrackingProvider, tracking], [
+    TrackingProvider,
+    tracking,
+  ]);
 }
