@@ -14,6 +14,13 @@ export default function useTracking(trackingData, options) {
     );
   }
 
+  if (arguments.length < 1) {
+    return {
+      trackEvent: trackingContext.tracking.dispatch,
+      getTrackingData: trackingContext.tracking.getTrackingData,
+    };
+  }
+
   const { contextValue, tracking } = useTrackingImpl(trackingData, options);
 
   const TrackingProvider = useCallback(
